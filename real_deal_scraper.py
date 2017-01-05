@@ -17,7 +17,7 @@ from urllib.request import urlretrieve
 from bs4 import BeautifulSoup
 
 from settings import DB_USER, DB_PASSWORD, DB_NAME, URL
-from models import Base, Article
+from models import Base, Article, Tag
 
 def get_session():
     engine = create_engine(
@@ -32,6 +32,10 @@ def get_session():
 
     return session
 
+def get_html(url):
+    response = urllib.request.urlopen(url)
+    return response.read()
+
 def main():
 
     session = get_session();
@@ -39,11 +43,27 @@ def main():
     
     articles = []
     for entry in data.entries:
+
+        page = get_html(entry.comments)
+        soup = BeautifulSoup(page, "html.parser")
+        page_article = soup.find('div', class_="entry-post")
+        
+        tags = []
+        post_tags_list = soup.find('div', class_="post-tags-list")
+        if (post_tags_list):
+            page_tags = post_tags_list.find_all('a')
+
+            for tag in page_tags:
+                tags.append(Tag(text=tag.string))
+                session.bulk_save_objects(tags)
+        
+
         articles.append(
             Article(
                 title=entry.title,
                 url=entry.comments,
-                posted=datetime(*entry.published_parsed[:6])
+                posted=datetime(*entry.published_parsed[:6]),
+                tags=tags
         ))
     
     session.bulk_save_objects(articles)
