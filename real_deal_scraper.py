@@ -17,7 +17,8 @@ from urllib.request import urlretrieve
 from bs4 import BeautifulSoup
 
 from settings import DB_USER, DB_PASSWORD, DB_NAME, URL
-from models import Base, Article, Tag
+from models import Base, Article, Tag, Author
+from db_utils import get_one_or_create
 
 def get_session():
     engine = create_engine(
@@ -36,38 +37,57 @@ def get_html(url):
     response = urllib.request.urlopen(url)
     return response.read()
 
+def get_tags(session, parser):
+    tags = []
+    post_tags_list = parser.find('div', class_="post-tags-list")
+    if (post_tags_list):
+        page_tags = post_tags_list.find_all('a')
+        
+        for tag in page_tags:
+            (tag_object, result) = get_one_or_create(session, Tag, text=tag.string)
+            tags.append(tag_object)
+    return tags
+
+def get_authors(session, parser):
+    authors = []
+    post_authors_list = parser.find('em', class_="author vcard")
+    if (post_authors_list):
+        page_authors = post_authors_list.find_all('a')
+        
+        for author in page_authors:
+            fullname = author.string.split()
+            first = fullname[0]
+            if len(fullname) >=2:
+                last = fullname[1]
+            else:
+                last = ''
+            (author_object, result) = get_one_or_create(
+                                        session, Author, first=first, last=last)
+            authors.append(author_object)
+    return authors
+
 def main():
 
-    session = get_session();
+    session = get_session()
     data = feedparser.parse(URL)
     
-    articles = []
     for entry in data.entries:
 
+        (article, article_result) = get_one_or_create(
+            session,
+            Article,
+            guid=entry.guid,
+            title=entry.title,
+            url=entry.comments,
+            posted=datetime(*entry.published_parsed[:6])
+        )
+        session.commit()
+
         page = get_html(entry.comments)
-        soup = BeautifulSoup(page, "html.parser")
-        page_article = soup.find('div', class_="entry-post")
-        
-        tags = []
-        post_tags_list = soup.find('div', class_="post-tags-list")
-        if (post_tags_list):
-            page_tags = post_tags_list.find_all('a')
-
-            for tag in page_tags:
-                tags.append(Tag(text=tag.string))
-                session.bulk_save_objects(tags)
-        
-
-        articles.append(
-            Article(
-                title=entry.title,
-                url=entry.comments,
-                posted=datetime(*entry.published_parsed[:6]),
-                tags=tags
-        ))
-    
-    session.bulk_save_objects(articles)
-    session.commit()
+        parser = BeautifulSoup(page, "html.parser")
+        article.tags = get_tags(session, parser)
+        article.authors = get_authors(session, parser)
+        session.commit()
 
     session.close()
 
