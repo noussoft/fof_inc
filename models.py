@@ -41,9 +41,9 @@ class Article(Base):
     publication_id = Column(Integer, ForeignKey('publications.id'))
     url = Column(String(255))
     photo1_url = Column(String(255))
-    photo1_data = Column(LargeBinary)
+    photo1_filename = Column(String(255))
     photo2_url = Column(String(255))
-    photo2_data = Column(LargeBinary)
+    photo2_filename = Column(String(255))
 
     tags = relationship("Tag",
                     secondary=tags_articles,
