@@ -32,15 +32,15 @@ CREATE TABLE `articles` (
   `publication_id` int(11) DEFAULT NULL,
   `url` varchar(255) DEFAULT NULL,
   `photo1_url` varchar(255) DEFAULT NULL,
-  `photo1_data` blob,
+  `photo1_filename` varchar(255) DEFAULT NULL,
   `photo2_url` varchar(255) DEFAULT NULL,
-  `photo2_data` blob,
+  `photo2_filename` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ix_articles_guid` (`guid`),
   KEY `publication_id` (`publication_id`),
+  KEY `ix_articles_title` (`title`),
   KEY `ix_articles_posted` (`posted`),
   KEY `ix_articles_subtitle` (`subtitle`),
-  KEY `ix_articles_title` (`title`),
   CONSTRAINT `articles_ibfk_1` FOREIGN KEY (`publication_id`) REFERENCES `publications` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -63,9 +63,9 @@ CREATE TABLE `authors` (
   `articles_page` varchar(255) DEFAULT NULL,
   `bio` text,
   PRIMARY KEY (`id`),
+  KEY `ix_authors_last` (`last`),
   KEY `ix_authors_first` (`first`),
-  KEY `ix_authors_email` (`email`),
-  KEY `ix_authors_last` (`last`)
+  KEY `ix_authors_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -146,4 +146,4 @@ CREATE TABLE `tags_articles` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-01-10 17:13:14
+-- Dump completed on 2017-01-11  1:19:00
