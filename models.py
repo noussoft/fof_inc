@@ -5,7 +5,8 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 from sqlalchemy import (
-    Column, Boolean, Integer, Numeric, String, DateTime, Text, Table, ForeignKey
+    Column, Boolean, Integer, Numeric, String, DateTime,
+    LargeBinary, Text, Table, ForeignKey,
 )
 
 tags_articles = Table('tags_articles', Base.metadata,
@@ -23,12 +24,17 @@ class Article(Base):
     __tablename__ = 'articles'
 
     id = Column(Integer, primary_key=True)
-    title = Column(String(255), index=True)
-    scraped = Column(DateTime(timezone=True), default=func.now())
-    posted = Column(DateTime(timezone=True))
+    guid = Column(String(255), index=True, unique=True, nullable=False)
+    title = Column(String(255), index=True, nullable=False)
+    subtitle = Column(String(255), index=True)
+    scraped = Column(DateTime(timezone=True), default=func.now(), nullable=False)
+    posted = Column(DateTime(timezone=True), index=True)
     publication_id = Column(Integer)
     url = Column(String(255))
     photo1_url = Column(String(255))
+    photo1_data = Column(LargeBinary)
+    photo2_url = Column(String(255))
+    photo2_data = Column(LargeBinary)
 
     tags = relationship("Tag",
                     secondary=tags_articles,
@@ -41,8 +47,8 @@ class Article(Base):
 class Author(Base):
     __tablename__ = 'authors'
 
-    id = Column(Integer, primary_key=True)
-    first = Column(String(32), index=True)
+    id = Column(Integer, primary_key=True, nullable=False)
+    first = Column(String(32), index=True, nullable=False)
     last = Column(String(32), index=True)
     email = Column(String(255), index=True)
     twitter = Column(String(255))
@@ -54,5 +60,5 @@ class Author(Base):
 class Tag(Base):
     __tablename__ = 'tags'
 
-    id = Column(Integer, primary_key=True)
-    text = Column(String(32))
+    id = Column(Integer, primary_key=True, nullable=False)
+    text = Column(String(255), unique=True, nullable=False)
