@@ -20,6 +20,15 @@ authors_articles = Table('authors_articles', Base.metadata,
     Column('primary_author_yn', Boolean, default=False)
 )
 
+class Publication(Base):
+    __tablename__ = 'publications'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255), index=True, nullable=False)
+    url = Column(String(255))
+    mobile_url = Column(String(255))
+    rss_url = Column(String(255))
+
 class Article(Base):
     __tablename__ = 'articles'
 
@@ -29,7 +38,7 @@ class Article(Base):
     subtitle = Column(String(255), index=True)
     scraped = Column(DateTime(timezone=True), default=func.now(), nullable=False)
     posted = Column(DateTime(timezone=True), index=True)
-    publication_id = Column(Integer)
+    publication_id = Column(Integer, ForeignKey('publications.id'))
     url = Column(String(255))
     photo1_url = Column(String(255))
     photo1_data = Column(LargeBinary)
@@ -44,10 +53,15 @@ class Article(Base):
                     secondary=authors_articles,
                     backref="articles")
 
+    publication = relationship("Publication", backref="articles")
+
+    def __repr__(self):
+        return "{} - {}".format(self.guid, self.title)
+
 class Author(Base):
     __tablename__ = 'authors'
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True)
     first = Column(String(32), index=True, nullable=False)
     last = Column(String(32), index=True)
     email = Column(String(255), index=True)
@@ -57,8 +71,14 @@ class Author(Base):
     articles_page = Column(String(255))
     bio = Column(Text)
 
+    def __repr__(self):
+        return " ".join([self.first, self.last])
+
 class Tag(Base):
     __tablename__ = 'tags'
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True)
     text = Column(String(255), unique=True, nullable=False)
+
+    def __repr__(self):
+        return self.text
