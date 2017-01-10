@@ -20,6 +20,9 @@ from settings import DB_USER, DB_PASSWORD, DB_NAME, URL
 from models import Base, Article, Tag, Author
 from db_utils import get_one_or_create
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, 'images')
+
 def get_session():
     engine = create_engine(
         'mysql://{}:{}@localhost/{}?charset=utf8'.format(DB_USER, DB_PASSWORD, DB_NAME),
@@ -66,9 +69,28 @@ def get_authors(session, parser):
             authors.append(author_object)
     return authors
 
+def get_images(parser):
+    images = []
+    post_image_list = parser.find('div', class_="post-content-box")
+    if (post_image_list):
+        page_images = post_image_list.find_all('img')
+        
+        images = [image['src'] for image in page_images]
+        
+    return images
+
+def save_image(url):
+    file_to_save = url.split('/')[-1]
+    urlretrieve(url, os.path.join(OUTPUT_DIR, file_to_save))
+    return file_to_save
+
 def main():
 
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+
     session = get_session()
+    sys.exit(0)
     data = feedparser.parse(URL)
     
     for entry in data.entries:
@@ -87,6 +109,19 @@ def main():
         parser = BeautifulSoup(page, "html.parser")
         article.tags = get_tags(session, parser)
         article.authors = get_authors(session, parser)
+        images = get_images(parser)
+        try:
+            article.photo1_url = images[0]
+            article.photo1_filename = save_image(images[0])
+        except IndexError:
+            #just skip 
+            pass
+        try:
+            article.photo2_url = images[1]
+            article.photo2_filename = save_image(images[1])
+        except IndexError:
+            #just skip 
+            pass
         session.commit()
 
     session.close()
