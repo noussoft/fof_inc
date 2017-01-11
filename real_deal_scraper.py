@@ -90,7 +90,6 @@ def main():
         os.makedirs(OUTPUT_DIR)
 
     session = get_session()
-    sys.exit(0)
     data = feedparser.parse(URL)
     
     for entry in data.entries:
