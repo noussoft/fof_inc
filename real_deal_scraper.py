@@ -16,10 +16,11 @@ from sqlalchemy_utils.functions import database_exists, create_database
 from urllib.request import urlretrieve
 from bs4 import BeautifulSoup
 
-from settings import DB_USER, DB_PASSWORD, DB_NAME, URL
+from settings import DB_USER, DB_PASSWORD, DB_NAME
 from models import Base, Article, Tag, Author
 from db_utils import get_one_or_create
 
+URL = 'http://feeds.feedburner.com/trdnews?format=xml'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, 'images')
 
