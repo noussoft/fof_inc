@@ -1,3 +1,4 @@
+import re
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 
@@ -17,3 +18,6 @@ def get_one_or_create(session,
             return created, False
         except IntegrityError:
             return session.query(model).filter_by(**kwargs).one(), True
+
+def remove_non_ascii(text):
+    return re.sub(r'[^\x00-\x7f]', r'_', text)
