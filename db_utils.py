@@ -1,4 +1,5 @@
 import re
+import urllib.parse
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 
@@ -21,3 +22,9 @@ def get_one_or_create(session,
 
 def remove_non_ascii(text):
     return re.sub(r'[^\x00-\x7f]', r'_', text)
+
+def prepare_url(url):
+    url = urllib.parse.urlsplit(url)
+    url = list(url)
+    url[2] = urllib.parse.quote(url[2])
+    return urllib.parse.urlunsplit(url)

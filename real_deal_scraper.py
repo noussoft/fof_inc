@@ -18,7 +18,7 @@ from bs4 import BeautifulSoup
 
 from settings import DB_USER, DB_PASSWORD, DB_NAME
 from models import Base, Article, Tag, Author
-from db_utils import get_one_or_create, remove_non_ascii
+from db_utils import get_one_or_create, remove_non_ascii, prepare_url
 
 URL = 'http://feeds.feedburner.com/trdnews?format=xml'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -81,7 +81,7 @@ def get_images(parser):
 
 def save_image(url):
     file_to_save = remove_non_ascii(url.split('/')[-1])
-    urlretrieve(url, os.path.join(OUTPUT_DIR, file_to_save))
+    urlretrieve(prepare_url(url), os.path.join(OUTPUT_DIR, file_to_save))
     return file_to_save
 
 def main():
