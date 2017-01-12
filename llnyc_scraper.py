@@ -18,11 +18,9 @@ from bs4 import BeautifulSoup
 
 from settings import DB_USER, DB_PASSWORD, DB_NAME
 from models import Base, Article, Tag, Author
-from db_utils import get_one_or_create
+from utils import OUTPUT_DIR, get_one_or_create, save_image
 
 URL ='http://www.llnyc.com/feed'
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_DIR = os.path.join(BASE_DIR, 'images')
 
 def get_session():
     engine = create_engine(
@@ -65,11 +63,6 @@ def get_authors(session, authors):
 
 def get_images(parser):
     return [image['src'] for image in parser.find_all('img')]
-        
-def save_image(url):
-    file_to_save = url.split('/')[-1]
-    urlretrieve(url, os.path.join(OUTPUT_DIR, file_to_save))
-    return file_to_save
 
 def main():
 
@@ -86,6 +79,7 @@ def main():
             Article,
             guid=entry.guid,
             title=entry.title,
+            body=entry.content[0]['value'],
             url=entry.link,
             posted=datetime(*entry.published_parsed[:6])
         )
