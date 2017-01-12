@@ -38,6 +38,7 @@ class Article(Base):
     subtitle = Column(String(255), index=True)
     scraped = Column(DateTime(timezone=True), default=func.now(), nullable=False)
     posted = Column(DateTime(timezone=True), index=True)
+    body = Column(Text)
     publication_id = Column(Integer, ForeignKey('publications.id'))
     url = Column(String(255))
     photo1_url = Column(String(255))
