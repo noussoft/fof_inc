@@ -21,13 +21,6 @@ def get_html(url):
     response = urllib.request.urlopen(url)
     return response.read()
 
-def get_tags(session, tags):
-    result = []
-    for tag in tags:
-        (tag_object, is_added) = get_one_or_create(session, Tag, text=tag['term'])
-        result.append(tag_object)
-    return result
-
 def get_authors(session, authors):
     result = []
         
@@ -73,7 +66,6 @@ def main():
         )
         session.commit()
         
-        # article.tags = get_tags(session, entry.tags)
         article.authors = get_authors(session, entry.authors)
 
         parser = BeautifulSoup(entry.content[0]['value'], "html.parser")
