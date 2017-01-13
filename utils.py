@@ -35,7 +35,6 @@ def prepare_url(url):
     return urllib.parse.urlunsplit(url)
 
 def save_image(url):
-    print(url)
     file_to_save = remove_non_ascii(url.split('/')[-1])
     urlretrieve(prepare_url(url), os.path.join(OUTPUT_DIR, file_to_save))
     return file_to_save

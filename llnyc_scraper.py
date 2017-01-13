@@ -77,11 +77,14 @@ def main():
         (article, article_result) = get_one_or_create(
             session,
             Article,
-            guid=entry.guid,
-            title=entry.title,
-            body=entry.content[0]['value'],
-            url=entry.link,
-            posted=datetime(*entry.published_parsed[:6])
+            create_method_kwargs=dict(
+                guid=entry.guid,
+                title=entry.title,
+                body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text(),
+                url=entry.link,
+                posted=datetime(*entry.published_parsed[:6])
+            ),
+            guid=entry.guid
         )
         session.commit()
         
