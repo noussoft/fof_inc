@@ -2,11 +2,34 @@ import os
 import re
 import urllib.parse
 from urllib.request import urlretrieve
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from sqlalchemy_utils.functions import database_exists, create_database
+
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.pool import NullPool
+
+from settings import DB_USER, DB_PASSWORD, DB_NAME
+from models import Base
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, 'images')
+
+def get_session():
+    engine = create_engine(
+        'mysql://{}:{}@localhost/{}?charset=utf8'.format(DB_USER, DB_PASSWORD, DB_NAME),
+        poolclass=NullPool)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    if not database_exists(engine.url):
+        create_database(engine.url)
+        Base.metadata.create_all(engine)
+
+    return session
 
 def get_one_or_create(session,
                       model,

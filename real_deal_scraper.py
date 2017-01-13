@@ -8,31 +8,12 @@ import feedparser
 
 from datetime import datetime
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
-from sqlalchemy_utils.functions import database_exists, create_database
-
 from bs4 import BeautifulSoup
 
-from settings import DB_USER, DB_PASSWORD, DB_NAME
-from models import Base, Article, Tag, Author
-from utils import OUTPUT_DIR, get_one_or_create, save_image
+from models import Article, Tag, Author
+from utils import OUTPUT_DIR, get_one_or_create, get_session, save_image
 
 URL = 'http://feeds.feedburner.com/trdnews?format=xml'
-
-def get_session():
-    engine = create_engine(
-        'mysql://{}:{}@localhost/{}?charset=utf8'.format(DB_USER, DB_PASSWORD, DB_NAME),
-        poolclass=NullPool)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    if not database_exists(engine.url):
-        create_database(engine.url)
-        Base.metadata.create_all(engine)
-
-    return session
 
 def get_html(url):
     response = urllib.request.urlopen(url)
