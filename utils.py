@@ -1,7 +1,8 @@
 import os
 import re
+import sys
 import urllib.parse
-from urllib.request import urlretrieve
+from urllib.request import urlretrieve, HTTPError
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -12,10 +13,10 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.pool import NullPool
 
+from bs4 import BeautifulSoup
+
 from settings import DB_USER, DB_PASSWORD, DB_NAME
 from models import Base
-
-from urllib.request import HTTPError
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, 'images')
@@ -62,10 +63,18 @@ def prepare_url(url):
 def save_image(url):
     file_to_save = remove_non_ascii(url.split('/')[-1])
     full_path_name = os.path.join(OUTPUT_DIR, file_to_save)
-    
+
     if not os.path.isfile(full_path_name):
         try:
             urlretrieve(prepare_url(url), full_path_name)
         except HTTPError:
             pass
     return file_to_save
+
+def get_url_from_more_link(text):
+    parser = BeautifulSoup(text, "html.parser")
+    ahrefs = [url['href'] for url in parser.find_all('a') if url.text.lower() == '[more]']
+    try:
+      return ahrefs[0]
+    except IndexError:
+      return None

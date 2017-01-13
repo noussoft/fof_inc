@@ -10,10 +10,18 @@ from datetime import datetime
 
 from bs4 import BeautifulSoup
 
-from models import Article, Tag, Author
-from utils import OUTPUT_DIR, get_one_or_create, get_session, save_image
+from models import Article, Tag, Author, Publication
+from utils import (
+    OUTPUT_DIR,
+    get_one_or_create,
+    get_session,
+    save_image,
+    get_url_from_more_link
+)
 
 URL = 'http://feeds.feedburner.com/trdnews?format=xml'
+PUBLISHER_NAME = 'The Real Deal'
+PUBLISHER_URL = 'therealdeal.com'
 
 def get_html(url):
     response = urllib.request.urlopen(url)
@@ -58,47 +66,72 @@ def get_images(parser):
     return images
 
 def main():
-
     if not os.path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
 
     session = get_session()
+
+    (publication, publication_result) = get_one_or_create(
+                session,
+                Publication,
+                create_method_kwargs=dict(
+                    title=PUBLISHER_NAME,
+                    url=PUBLISHER_URL
+                ),
+                url=PUBLISHER_URL
+            )
+
     data = feedparser.parse(URL)
     
     for entry in data.entries:
 
-        (article, article_result) = get_one_or_create(
-            session,
-            Article,
-            create_method_kwargs=dict(
-                guid=entry.guid,
-                title=entry.title,
-                body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text(),
-                url=entry.comments,
-                posted=datetime(*entry.published_parsed[:6])
-            ),
-            guid=entry.guid
-        )
-        session.commit()
+        article_url = get_url_from_more_link(entry.content[0]['value'])
+        if (article_url is not None):
+            if (urllib.parse.urlsplit(article_url)[1] == PUBLISHER_URL):
 
-        page = get_html(entry.comments)
-        parser = BeautifulSoup(page, "html.parser")
-        article.tags = get_tags(session, parser)
-        article.authors = get_authors(session, parser)
-        images = get_images(parser)
-        try:
-            article.photo1_url = images[0]
-            article.photo1_filename = save_image(images[0])
-        except IndexError:
-            #just skip 
-            pass
-        try:
-            article.photo2_url = images[1]
-            article.photo2_filename = save_image(images[1])
-        except IndexError:
-            #just skip 
-            pass
-        session.commit()
+                page = get_html(article_url)
+                parser = BeautifulSoup(page, "html.parser")
+
+                body = " ".join(
+                    [p.get_text() 
+                        for p in parser.find('div', class_="post-content-box").find_all('p')
+                    ]
+                )
+            else:
+                body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text()
+
+            (article, article_result) = get_one_or_create(
+                session,
+                Article,
+                create_method_kwargs=dict(
+                    guid=entry.guid,
+                    title=entry.title,
+                    body=body,
+                    url=article_url,
+                    posted=datetime(*entry.published_parsed[:6]),
+                    publication=publication
+                ),
+                guid=entry.guid
+            )
+            session.commit()
+            
+            parser = BeautifulSoup(page, "html.parser")
+            article.tags = get_tags(session, parser)
+            article.authors = get_authors(session, parser)
+            images = get_images(parser)
+            try:
+                article.photo1_url = images[0]
+                article.photo1_filename = save_image(images[0])
+            except IndexError:
+                #just skip 
+                pass
+            try:
+                article.photo2_url = images[1]
+                article.photo2_filename = save_image(images[1])
+            except IndexError:
+                #just skip 
+                pass
+            session.commit()
 
     session.close()
 
