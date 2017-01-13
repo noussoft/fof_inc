@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 from models import Article, Tag, Author
 from utils import OUTPUT_DIR, get_one_or_create, get_session, save_image
 
-URL ='http://www.llnyc.com/feed'
+URL ='http://ny.curbed.com/rss/smartnews.xml'
 
 
 def get_html(url):
@@ -73,7 +73,7 @@ def main():
         )
         session.commit()
         
-        article.tags = get_tags(session, entry.tags)
+        # article.tags = get_tags(session, entry.tags)
         article.authors = get_authors(session, entry.authors)
 
         parser = BeautifulSoup(entry.content[0]['value'], "html.parser")
