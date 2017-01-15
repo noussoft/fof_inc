@@ -22,6 +22,7 @@ from utils import (
 URL = 'http://feeds.feedburner.com/trdnews?format=xml'
 PUBLISHER_NAME = 'The Real Deal'
 PUBLISHER_URL = 'therealdeal.com'
+PUBLISHER_RSS_URL = URL
 
 def get_html(url):
     response = urllib.request.urlopen(url)
@@ -76,7 +77,8 @@ def main():
                 Publication,
                 create_method_kwargs=dict(
                     title=PUBLISHER_NAME,
-                    url=PUBLISHER_URL
+                    url=PUBLISHER_URL,
+                    rss_url=PUBLISHER_RSS_URL
                 ),
                 url=PUBLISHER_URL
             )
