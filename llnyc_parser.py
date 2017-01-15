@@ -11,10 +11,13 @@ from datetime import datetime
 from urllib.request import urlretrieve
 from bs4 import BeautifulSoup
 
-from models import Article, Tag, Author
+from models import Article, Tag, Author, Publication
 from utils import OUTPUT_DIR, get_one_or_create, get_session, save_image
 
 URL ='http://www.llnyc.com/feed'
+PUBLISHER_NAME = 'Luxury Listings (NYC)'
+PUBLISHER_URL = 'www.llnyc.com'
+PUBLISHER_RSS_URL = URL
 
 
 def get_html(url):
@@ -55,6 +58,18 @@ def main():
         os.makedirs(OUTPUT_DIR)
 
     session = get_session()
+
+    (publication, publication_result) = get_one_or_create(
+                session,
+                Publication,
+                create_method_kwargs=dict(
+                    title=PUBLISHER_NAME,
+                    url=PUBLISHER_URL,
+                    rss_url=PUBLISHER_RSS_URL
+                ),
+                url=PUBLISHER_URL
+            )
+
     data = feedparser.parse(URL)
 
     for entry in data.entries:
@@ -67,7 +82,8 @@ def main():
                 title=entry.title,
                 body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text(),
                 url=entry.link,
-                posted=datetime(*entry.published_parsed[:6])
+                posted=datetime(*entry.published_parsed[:6]),
+                publication=publication
             ),
             guid=entry.guid
         )
