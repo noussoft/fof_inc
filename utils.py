@@ -71,9 +71,9 @@ def save_image(url):
             pass
     return file_to_save
 
-def get_url_from_more_link(text):
+def get_url_from_more_link(text, link_text='[more]'):
     parser = BeautifulSoup(text, "html.parser")
-    ahrefs = [url['href'] for url in parser.find_all('a') if url.text.lower() == '[more]']
+    ahrefs = [url['href'] for url in parser.find_all('a') if url.text.lower() == link_text]
     try:
       return ahrefs[0]
     except IndexError:
