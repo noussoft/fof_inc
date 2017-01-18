@@ -17,7 +17,7 @@ tags_articles = Table('tags_articles', Base.metadata,
 authors_articles = Table('authors_articles', Base.metadata,
     Column('author_id', Integer, ForeignKey('authors.id')),
     Column('article_id', Integer, ForeignKey('articles.id')),
-    Column('primary_author_yn', Boolean, default=False)
+    Column('primary_author_yn', Boolean, default=True)
 )
 
 class Publication(Base):
