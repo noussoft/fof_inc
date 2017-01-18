@@ -70,13 +70,29 @@ def main():
     data = feedparser.parse(URL)
 
     for entry in data.entries:
+
+        page = get_html(entry.link)
+        parser = BeautifulSoup(page, "html.parser")
+        try:
+            body = " ".join(
+                [p.get_text() 
+                    for p in parser.find('div', class_="attribute-long").find_all('p')
+                ]
+            )
+        except AttributeError:
+            body = " ".join(
+                [p.get_text() 
+                    for p in parser.find('div', class_="attribute-short").find_all('p')
+                ]
+            )
+
         (article, article_result) = get_one_or_create(
             session,
             Article,
             create_method_kwargs=dict(
                 guid=entry.guid,
                 title=entry.title,
-                # body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text(),
+                body=body,
                 url=entry.link,
                 posted=datetime(*entry.published_parsed[:6]),
                 publication=publication
