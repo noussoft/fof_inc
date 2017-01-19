@@ -46,15 +46,16 @@ def get_authors(session, parser):
     if (post_authors_list):
         page_authors = post_authors_list.find_all('a')
         for author in page_authors:
-            fullname = author.string.split()
-            first = fullname[0]
-            if len(fullname) >=2:
-                last = fullname[1]
-            else:
-                last = ''
-            (author_object, is_added) = get_one_or_create(
-                                        session, Author, first=first, last=last)
-            result.append(author_object)
+            if (author.string is not None):
+                fullname = author.string.split()
+                first = fullname[0]
+                if len(fullname) >=2:
+                    last = fullname[1]
+                else:
+                    last = ''
+                (author_object, is_added) = get_one_or_create(
+                                            session, Author, first=first, last=last)
+                result.append(author_object)
     return result
 
 def main():

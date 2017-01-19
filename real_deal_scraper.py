@@ -46,15 +46,16 @@ def get_authors(session, parser):
         page_authors = post_authors_list.find_all('a')
         
         for author in page_authors:
-            fullname = author.string.split()
-            first = fullname[0]
-            if len(fullname) >=2:
-                last = fullname[1]
-            else:
-                last = ''
-            (author_object, result) = get_one_or_create(
-                                        session, Author, first=first, last=last)
-            authors.append(author_object)
+            if (author.string is not None):
+                fullname = author.string.split()
+                first = fullname[0]
+                if len(fullname) >=2:
+                    last = fullname[1]
+                else:
+                    last = ''
+                (author_object, result) = get_one_or_create(
+                                            session, Author, first=first, last=last)
+                authors.append(author_object)
     return authors
 
 def get_images(parser):
@@ -89,16 +90,20 @@ def main():
 
         article_url = get_url_from_more_link(entry.content[0]['value'])
         if (article_url is not None):
+            
             if (urllib.parse.urlsplit(article_url)[1] == PUBLISHER_URL):
 
                 page = get_html(article_url)
                 parser = BeautifulSoup(page, "html.parser")
-
-                body = " ".join(
-                    [p.get_text() 
-                        for p in parser.find('div', class_="post-content-box").find_all('p')
-                    ]
-                )
+                content = parser.find('div', class_="post-content-box")
+                if (content is not None):
+                    body = " ".join(
+                        [p.get_text() 
+                            for p in content.find_all('p')
+                        ]
+                    )
+                else:
+                    body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text()
             else:
                 body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text()
 
