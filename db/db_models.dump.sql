@@ -26,6 +26,7 @@ CREATE TABLE `articles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `guid` varchar(255) NOT NULL,
   `title` varchar(255) NOT NULL,
+  `body` text,
   `subtitle` varchar(255) DEFAULT NULL,
   `scraped` datetime NOT NULL,
   `posted` datetime DEFAULT NULL,
