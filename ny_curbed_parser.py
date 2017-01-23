@@ -67,13 +67,24 @@ def main():
 
     for entry in data.entries:
 
+        page = get_html(entry.link)
+        parser = BeautifulSoup(page, "html.parser")
+        content = parser.find('div', class_="c-entry-content")
+        body=''
+        if (content is not None):
+            body = " ".join(
+                [p.get_text() 
+                    for p in content.find_all('p')
+                ]
+            )
+
         (article, article_result) = get_one_or_create(
             session,
             Article,
             create_method_kwargs=dict(
                 guid=entry.guid,
                 title=entry.title,
-                body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text(),
+                body=body,
                 url=entry.link,
                 posted=datetime(*entry.published_parsed[:6]),
                 publication=publication
