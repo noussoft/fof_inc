@@ -103,16 +103,25 @@ def main():
             ]
         )
 
-        (article, article_result) = get_one_or_create(
-            session,
-            Article,
-            create_method_kwargs=dict(
+        article_data = dict(
                 guid=full_article_url,
                 title=parser.find('h1', class_="article__title").get_text(),
                 body=body,
                 url=full_article_url,
                 publication=publication
-            ),
+            )
+
+        meta_spans = parser.find('div', class_="article__meta").find_all('span')
+        if len(meta_spans) >= 2:
+            try:
+                article_data['posted'] = datetime.strptime(meta_spans[1].get_text().strip(), '%d %B %Y')
+            except ValueError:
+                pass
+
+        (article, article_result) = get_one_or_create(
+            session,
+            Article,
+            create_method_kwargs=article_data,
             guid=full_article_url
         )
         session.commit()
