@@ -111,7 +111,6 @@ def main():
                 title=parser.find('h1', class_="article__title").get_text(),
                 body=body,
                 url=full_article_url,
-                # posted=datetime(*entry.published_parsed[:6]),
                 publication=publication
             ),
             guid=full_article_url
