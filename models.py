@@ -28,6 +28,7 @@ class Publication(Base):
     url = Column(String(255))
     mobile_url = Column(String(255))
     rss_url = Column(String(255))
+    last_run = Column(DateTime(timezone=True), index=True)
 
 class Article(Base):
     __tablename__ = 'articles'

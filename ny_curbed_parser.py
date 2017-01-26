@@ -109,8 +109,11 @@ def main():
         except IndexError:
             #just skip 
             pass
+
         session.commit()
 
+    publication.last_run = datetime.now()
+    session.commit()
     session.close()
 
     print("\nJob is done")

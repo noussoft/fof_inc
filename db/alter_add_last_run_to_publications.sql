@@ -1,0 +1,1 @@
+alter table `publications` add column `last_run` datetime DEFAULT NULL;

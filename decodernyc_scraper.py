@@ -107,9 +107,11 @@ def main():
         parser = BeautifulSoup(page, "html.parser")
         article.authors = get_authors(session, parser)
         article.tags = get_tags(session, parser)
-
+        
         session.commit()
 
+    publication.last_run = datetime.now()
+    session.commit()
     session.close()
 
     print("\nJob is done")
