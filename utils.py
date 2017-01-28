@@ -23,7 +23,7 @@ OUTPUT_DIR = os.path.join(BASE_DIR, 'images')
 
 def get_session():
     engine = create_engine(
-        'mysql://{}:{}@localhost/{}?charset=utf8'.format(DB_USER, DB_PASSWORD, DB_NAME),
+        'mysql://{}:{}@{}/{}?charset=utf8'.format(DB_USER, DB_PASSWORD, DB_HOST, DB_NAME),
         poolclass=NullPool)
     Session = sessionmaker(bind=engine)
     session = Session()
