@@ -104,42 +104,41 @@ def main():
                     )
                 else:
                     body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text()
-            else:
-                body=BeautifulSoup(entry.content[0]['value'], "html.parser").get_text()
-
-            (article, article_result) = get_one_or_create(
-                session,
-                Article,
-                create_method_kwargs=dict(
-                    guid=entry.guid,
-                    title=entry.title,
-                    body=body,
-                    url=article_url,
-                    posted=datetime(*entry.published_parsed[:6]),
-                    publication=publication
-                ),
-                guid=entry.guid
-            )
-            session.commit()
             
-            parser = BeautifulSoup(page, "html.parser")
-            article.tags = get_tags(session, parser)
-            article.authors = get_authors(session, parser)
-            images = get_images(parser)
-            try:
-                article.photo1_url = images[0]
-                article.photo1_filename = save_image(images[0])
-            except IndexError:
-                #just skip 
-                pass
-            try:
-                article.photo2_url = images[1]
-                article.photo2_filename = save_image(images[1])
-            except IndexError:
-                #just skip 
-                pass
 
-            session.commit()
+                (article, article_result) = get_one_or_create(
+                    session,
+                    Article,
+                    create_method_kwargs=dict(
+                        guid=entry.guid,
+                        title=entry.title,
+                        body=body,
+                        url=article_url,
+                        posted=datetime(*entry.published_parsed[:6]),
+                        publication=publication
+                    ),
+                    guid=entry.guid
+                )
+                session.commit()
+                
+                parser = BeautifulSoup(page, "html.parser")
+                article.tags = get_tags(session, parser)
+                article.authors = get_authors(session, parser)
+                images = get_images(parser)
+                try:
+                    article.photo1_url = images[0]
+                    article.photo1_filename = save_image(images[0])
+                except IndexError:
+                    #just skip 
+                    pass
+                try:
+                    article.photo2_url = images[1]
+                    article.photo2_filename = save_image(images[1])
+                except IndexError:
+                    #just skip 
+                    pass
+
+                session.commit()
 
     publication.last_run = datetime.now()
     session.commit()
