@@ -75,7 +75,7 @@ def main():
     data = feedparser.parse(URL)
 
     for entry in data.entries:
-
+        print(entry.link)
         page = get_html(entry.link)
         parser = BeautifulSoup(page, "html.parser")
 
@@ -102,14 +102,16 @@ def main():
         article.tags = get_tags(session, entry.tags)
         
         article.authors = get_authors(session, parser)
-        image_url = parser.find('div', class_="content").find('img')['src']
-        try:
-            article.photo1_url = image_url
-            image_url = url = re.sub('\?.*$', '', image_url)
-            article.photo1_filename = save_image(image_url)
-        except IndexError:
-            #just skip 
-            pass
+        image = parser.find('div', class_="content").find('img')
+        if (image is not None):
+            image_url = image['src']
+            try:
+                article.photo1_url = image_url
+                image_url = url = re.sub('\?.*$', '', image_url)
+                article.photo1_filename = save_image(image_url)
+            except IndexError:
+                #just skip 
+                pass
         
         session.commit()
 

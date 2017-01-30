@@ -15,7 +15,7 @@ from sqlalchemy.pool import NullPool
 
 from bs4 import BeautifulSoup
 
-from settings import DB_USER, DB_PASSWORD, DB_NAME
+from settings import DB_USER, DB_PASSWORD, DB_NAME, DB_HOST
 from models import Base
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
